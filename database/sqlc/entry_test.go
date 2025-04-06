@@ -21,34 +21,38 @@ func createRandomEntry(t *testing.T) Entry {
 	assert.NotEmpty(t, accounts)
 	assert.Nil(t, err)
 	n := len(accounts)
-	sign := rand.Intn(2)
 	var money float64
-	randIdx := rand.Intn(n)
-	accountId := accounts[randIdx].ID
-	if sign != 1 {
-		money = util.RandomMoney(int64(accounts[randIdx].Balance))
-		money *= -1
-	} else {
-		money = util.RandomMoney(10000)
-	}
-	updateAccountParams := UpdateAccountParams{
-		ID:      accountId,
-		Balance: accounts[randIdx].Balance + money,
-	}
-	_, err = testQueries.UpdateAccount(context.Background(), updateAccountParams)
+	fromRandIdx := rand.Intn(n)
+	fromAccountId := accounts[fromRandIdx].ID
+	toRandIdx := rand.Intn(n)
+	toAccountId := accounts[toRandIdx].ID
+	money = util.RandomMoney(int64(accounts[fromRandIdx].Balance))
+	_, err = testQueries.UpdateAccount(context.Background(), UpdateAccountParams{
+		ID:      fromAccountId,
+		Balance: accounts[fromRandIdx].Balance - money,
+	})
+	assert.NoError(t, err)
+	_, err = testQueries.UpdateAccount(context.Background(), UpdateAccountParams{
+		ID:      toAccountId,
+		Balance: accounts[toRandIdx].Balance + money,
+	})
+	entry, err := testQueries.CreateEntry(context.Background(), CreateEntryParams{
+		AccountID: fromAccountId,
+		Amount:    -money,
+	})
 	if err != nil {
 		t.Fatal(err)
 	}
-	argEntry := CreateEntryParams{
-		AccountID: accountId,
-		Amount:    money,
-	}
-	entry, err := testQueries.CreateEntry(context.Background(), argEntry)
-	if err != nil {
-		t.Fatal(err)
-	}
-	assert.Equal(t, argEntry.AccountID, entry.AccountID)
+	assert.Equal(t, fromAccountId, entry.AccountID)
+	assert.Equal(t, -money, entry.Amount)
 	assert.Nil(t, err)
+	receivedEntry, err := testQueries.CreateEntry(context.Background(), CreateEntryParams{
+		AccountID: toAccountId,
+		Amount:    money,
+	})
+	assert.NoError(t, err)
+	assert.Equal(t, toAccountId, receivedEntry.AccountID)
+	assert.Equal(t, money, receivedEntry.Amount)
 	return entry
 }
 
