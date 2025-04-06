@@ -6,12 +6,12 @@ plugins:
       sha256: 4ca52949f4dc04b55188439f5de0ae20af2a71e3534b87907f2a7f466bda59ec
 sql:
   - engine: postgresql
-    queries: ./queries
-    schema: ./migration
+    queries: ./database/queries
+    schema: ./database/migration
     gen:
       go:
         package: db
-        out: ./sqlc
+        out: ./database/sqlc
         sql_package: "database/sql"
         emit_json_tags: true
         emit_interface: true

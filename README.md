@@ -10,3 +10,6 @@ Learning backend technologies with golang
 
 1. make migrateup -> Migrate up commands
 2. make sqlc -> Generates Object mappings for postgres using sqlc
+
+## Note - 
+1. In order to successfully run unit tests during the first run, please run TestQueries_CreateAccount inside sqlc/account_test.go first 

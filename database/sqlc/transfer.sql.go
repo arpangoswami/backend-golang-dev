@@ -20,9 +20,9 @@ INSERT INTO transfers (
 `
 
 type CreateTransferParams struct {
-	FromAccountID int64 `json:"from_account_id"`
-	ToAccountID   int64 `json:"to_account_id"`
-	Amount        int64 `json:"amount"`
+	FromAccountID int64   `json:"from_account_id"`
+	ToAccountID   int64   `json:"to_account_id"`
+	Amount        float64 `json:"amount"`
 }
 
 func (q *Queries) CreateTransfer(ctx context.Context, arg CreateTransferParams) (Transfer, error) {
@@ -36,6 +36,15 @@ func (q *Queries) CreateTransfer(ctx context.Context, arg CreateTransferParams) 
 		&i.CreatedAt,
 	)
 	return i, err
+}
+
+const deleteTransfer = `-- name: DeleteTransfer :exec
+DELETE FROM transfers WHERE id = $1
+`
+
+func (q *Queries) DeleteTransfer(ctx context.Context, id int64) error {
+	_, err := q.db.ExecContext(ctx, deleteTransfer, id)
+	return err
 }
 
 const getTransfer = `-- name: GetTransfer :one

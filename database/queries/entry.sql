@@ -12,7 +12,10 @@ WHERE id = $1 LIMIT 1;
 
 -- name: ListEntries :many
 SELECT * FROM entries
-WHERE account_id = $1
+WHERE account_id = ANY($1::bigint[])
 ORDER BY id
 LIMIT $2
 OFFSET $3;
+
+-- name: DeleteEntry :exec
+DELETE FROM entries WHERE id = $1;
